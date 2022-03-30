@@ -2,8 +2,38 @@
 API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also reutrn number of squares can be drawn from provided points.
 ## Operations
 - Add - Add single/bulk co-ordinate points
+  E.g.
+  ```
+  POST api/v1/points/add
+  {
+    "userId": 1,
+    "points": [
+        {
+            "x":-1,
+            "y":-1
+        }
+    ]
+   }
+  ```
 - Delete - Delete single/bulk co-ordinate points
+  E.g.
+  ```
+  DELETE api/v1/points/delete
+   {
+     "userId": 1,
+     "points": [
+         {
+             "x":-1,
+             "y":-1
+         }
+     ]
+   }
+  ```
 - Squares - Get points that form square on 2D plane and the no. of squares that can be formed from co-ordinate points. 
+  E.g.
+  ```
+   GET api/v1/points/squares/1
+  ```
 ---
 ## Packages used
  - Microsoft.Data.SqlClient - To connect with MS SQL Database
@@ -51,7 +81,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     docker run -p 5000:5000 squareapi:latest
     ```
 ## Run Unit Test
-    To run unit tests, navigate to SquareAPI.Business.Test folder and open command prompt and run below command
+   To run unit tests, navigate to SquareAPI.Business.Test folder and open command prompt and run below command
     ```
     dotnet test
     ```
