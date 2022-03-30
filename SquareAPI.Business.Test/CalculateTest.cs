@@ -76,7 +76,9 @@ public class CalculateTest
             new Point {X = 1, Y = 1},
             new Point {X = 2, Y = 1},
             new Point {X = 2, Y = 2},
-            new Point {X = 3, Y = 3}
+            new Point {X = 3, Y = 3},
+            new Point {X = 3, Y = 4},
+            new Point {X = 0, Y = -2}
         };
     }
 }
