@@ -81,7 +81,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     ```
     docker run -p 5000:5000 squareapi:latest
     ```
-   - After running the project, Open http://localhost:{port} to view swagger documentation
+ - After running the project, Open http://localhost:{port} to view swagger documentation
 ## Run Unit Test
   - To run unit tests, navigate to SquareAPI.Business.Test folder and open command prompt and run below command
     ```
