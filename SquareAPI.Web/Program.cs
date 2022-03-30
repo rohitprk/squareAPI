@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 using SquareAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,13 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "Square API",
-        Version = "v1"
+        Version = "v1",
+        Description = "API to save co-ordinate points and reterive square from these points",
+        Contact = new OpenApiContact
+        {
+            Name = "Rohit Kumar",
+            Email = "-"
+        },
     });
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

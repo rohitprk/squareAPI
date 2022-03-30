@@ -7,7 +7,7 @@ namespace SquareAPI.Web
 {
 
     /// <summary>
-    /// Controller class for DUserPoints API operations.
+    /// Controller class for UserPoints API operations.
     /// </summary>
     [ApiController]
     [Route("api/v1/points/[action]")]
