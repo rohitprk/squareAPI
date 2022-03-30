@@ -64,8 +64,8 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     dotnet build
     ```
 ## Run Web API project
- - Run Sql script DBStructure.sql in MS SQL Server
- - Update connection string in SquareAPI.Web/appsettings.json
+ - Run Sql script DBStructure.sql, provided in solution folder, in MS SQL Server 
+ - Update connection string in SquareAPI.Web/appsettings.json to point your database server.
 - ### Using development server
     To run project using development Server(Kestrel), navigate to SquareAPI.Web folder and open command prompt to this location.
     Run command
