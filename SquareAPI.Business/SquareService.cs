@@ -16,15 +16,24 @@ namespace SquareAPI.Business
         /// </summary>
         private readonly IUserPointsRepository _squareDataRepo;
 
+        /// <summary>
+        /// Square Service class constructor to initialize readonly.
+        /// </summary>
+        /// <param name="squareDataRepo">UserPoints DB repository injected object.</param>
         public SquareService(IUserPointsRepository squareDataRepo)
         {
             _squareDataRepo = squareDataRepo;
         }
 
+        /// <summary>
+        /// Add unique user points in DB.
+        /// </summary>
+        /// <param name="userPoints">List of User co-ordinate points.</param>
+        /// <returns></returns>
         public async Task AddUserPoints(IEnumerable<UserPoint> userPoints)
         {
             var existingPoints = await _squareDataRepo.GetUserPoints(userPoints.First().UserId);
-            var newUserPoints = userPoints.Except(existingPoints);
+            var newUserPoints = userPoints.Except(existingPoints.Distinct());
 
             if (newUserPoints.Any())
             {
@@ -32,11 +41,21 @@ namespace SquareAPI.Business
             }
         }
 
+        /// <summary>
+        /// Delete user points from DB.
+        /// </summary>
+        /// <param name="userPoints">List of User co-ordinate points to delete.</param>
+        /// <returns></returns>
         public async Task DeleteUserPoints(IEnumerable<UserPoint> userPoints)
         {
             await _squareDataRepo.DeleteUserPoints(userPoints);
         }
 
+        /// <summary>
+        /// Get square formed from User Points. 
+        /// </summary>
+        /// <param name="userId">User Id to get user points.</param>
+        /// <returns>Square point object with square count and square co-ordinates.</returns>
         public async Task<SquarePoint> GetSquare(int userId)
         {
             var squarePoint = new SquarePoint();
@@ -113,6 +132,11 @@ namespace SquareAPI.Business
             return squarePoint;
         }
 
+        /// <summary>
+        /// Read from stream using CSVHelper.
+        /// </summary>
+        /// <param name="stream">Stream reader object holding file data.</param>
+        /// <returns>List of UserPoints uploaded in file.</returns>
         public IEnumerable<UserPoint> GetPoints(StreamReader stream)
         {
             using (var csv = new CsvReader(stream, CultureInfo.InvariantCulture))

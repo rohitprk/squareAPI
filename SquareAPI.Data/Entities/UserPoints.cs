@@ -2,13 +2,34 @@ using System.Text.Json.Serialization;
 
 namespace SquareAPI.Data.Entities
 {
+    /// <summary>
+    /// UserPoint entity class to hold UserPoints DB data.
+    /// </summary>
     public class UserPoint
     {
+        /// <summary>
+        /// Selected userId.
+        /// </summary>
+        /// <value>int</value>
         [JsonIgnore]
         public int UserId { get; set; }
+
+        /// <summary>
+        /// X co-ordinate of plane.
+        /// </summary>
+        /// <value>int</value>
         public int X { get; set; }
+
+        /// <summary>
+        /// Y co-ordinate of plane.
+        /// </summary>
+        /// <value>int</value>
         public int Y { get; set; }
 
+        /// <summary>
+        /// Unique Key of X and Y co-ordinate.
+        /// </summary>
+        /// <value>int</value>
         [JsonIgnore]
         public string Key => $"{X},{Y}";
 

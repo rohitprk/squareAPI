@@ -3,6 +3,9 @@ using SquareAPI.Data.Entities;
 
 namespace SquareAPI.Data
 {
+    /// <summary>
+    /// User Point repository interface declaring all operation on UserPoints table. 
+    /// </summary>
     public interface IUserPointsRepository
     {
         public Task<IEnumerable<UserPoint>> GetUserPoints(int userId);
@@ -15,8 +18,15 @@ namespace SquareAPI.Data
     /// </summary>
     public class UserPointsRepository : IUserPointsRepository
     {
+        /// <summary>
+        /// SquareAPI database context instance.
+        /// </summary>
         private readonly SquareAPIContext _context;
 
+        /// <summary>
+        /// Constructor to initialize readonly variables.
+        /// </summary>
+        /// <param name="context"></param>
         public UserPointsRepository(SquareAPIContext context)
         {
             _context = context;

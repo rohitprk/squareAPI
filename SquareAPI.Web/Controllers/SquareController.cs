@@ -1,8 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
-using SquareAPI.Business.Models;
-using SquareAPI.Data;
 using SquareAPI.Web.Models;
 
 namespace SquareAPI.Web.Controllers
@@ -15,8 +13,15 @@ namespace SquareAPI.Web.Controllers
     [Route("api/square")]
     public class SquareController : ControllerBase
     {
+        /// <summary>
+        /// SquareService instance to access business logic.
+        /// </summary>
         private readonly SquareService _squareService;
 
+        /// <summary>
+        /// Constructor to initialize readonly variables.
+        /// </summary>
+        /// <param name="squareService">Injected instance of SquareService.</param>
         public SquareController(SquareService squareService)
         {
             _squareService = squareService;
@@ -45,8 +50,8 @@ namespace SquareAPI.Web.Controllers
 
             response.Success = true;
             response.Message = squareData.Count > 0 ? string.Empty : "No points to form square.";
-            response.data = squareData;
-            
+            response.Data = squareData;
+
             return Ok(response);
         }
     }

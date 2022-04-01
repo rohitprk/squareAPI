@@ -1,8 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
-using SquareAPI.Data;
-using SquareAPI.Data.Entities;
 using SquareAPI.Web.Models;
 
 namespace SquareAPI.Web.Controllers
@@ -15,8 +13,15 @@ namespace SquareAPI.Web.Controllers
     [Route("api/points/[action]")]
     public class PointsController : ControllerBase
     {
+        /// <summary>
+        /// SquareService instance to access business logic.
+        /// </summary>
         private readonly SquareService _squareService;
 
+        /// <summary>
+        /// Constructor to initialize readonly variables.
+        /// </summary>
+        /// <param name="squareService">Injected instance of SquareService.</param>
         public PointsController(SquareService squareService)
         {
             _squareService = squareService;
@@ -58,9 +63,10 @@ namespace SquareAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Insert points in DB.
+        /// Upload CSV file to insert data in DB.
         /// </summary>
-        /// <param name="input">User points.</param>
+        /// <param name="userId">Current User Id to store respective data.</param>
+        /// <param name="file">Uploaded csv file.</param>
         /// <returns></returns>
         /// <response code="200">Success</response>
         /// <response code="400">Bad Request. Points are missing</response>

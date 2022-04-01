@@ -10,6 +10,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
  - Dapper - Micro ORM to manage database operation
  - Swashbuckle.AspNetCore - Swagger documentation
  - MSTest - Unit test framework
+ - CSVHelper - To read CSV file for bulk Upload
  ---
 ## Prerequisites
 - .NET SDK 6.0.201

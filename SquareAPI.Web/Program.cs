@@ -14,6 +14,7 @@ builder.Logging.AddConsole();
 builder.Services.AddControllers(
     options =>
     {
+        // add filter to set produceType directly to StatusCode 400 and 500
         options.Filters.Add(new Microsoft.AspNetCore.Mvc.ProducesResponseTypeAttribute(typeof(FailResponse), (int)StatusCodes.Status400BadRequest));
         options.Filters.Add(new Microsoft.AspNetCore.Mvc.ProducesResponseTypeAttribute(typeof(FailResponse), (int)StatusCodes.Status500InternalServerError));
     }
@@ -28,6 +29,7 @@ builder.Services.AddScoped<SquareService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    // Set swagger doc UI data.
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "Square API",
@@ -65,7 +67,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// custom message for all exceptions
+// custom response and logging for all exceptions
 app.UseExceptionHandler(exceptionHandlerApp =>
     {
         exceptionHandlerApp.Run(async context =>

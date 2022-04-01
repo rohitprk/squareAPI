@@ -7,6 +7,10 @@ namespace SquareAPI.Web.Models
     /// </summary>
     public class SquareResponse : Response
     {
-        public SquarePoint data { get; set; }
+        /// <summary>
+        /// Field to return SquarePoint data.
+        /// </summary>
+        /// <value>SquarePoint</value>
+        public SquarePoint Data { get; set; }
     }
 }
