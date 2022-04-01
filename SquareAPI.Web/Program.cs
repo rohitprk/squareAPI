@@ -1,15 +1,28 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
+using SquareAPI.Business;
 using SquareAPI.Data;
+using SquareAPI.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(
+    options =>
+    {
+        options.Filters.Add(new Microsoft.AspNetCore.Mvc.ProducesResponseTypeAttribute(typeof(FailResponse), (int)StatusCodes.Status400BadRequest));
+        options.Filters.Add(new Microsoft.AspNetCore.Mvc.ProducesResponseTypeAttribute(typeof(FailResponse), (int)StatusCodes.Status500InternalServerError));
+    }
+);
 
 // Dapper context and repository injection
 builder.Services.AddSingleton<SquareAPIContext>();
 builder.Services.AddScoped<IUserPointsRepository, UserPointsRepository>();
+builder.Services.AddScoped<SquareService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -44,10 +57,34 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseExceptionHandler("/exception");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// custom message for all exceptions
+app.UseExceptionHandler(exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+            var response = new FailResponse
+            {
+                Message = "Exception occurred!",
+                Success = false
+            };
+
+            await context.Response.WriteAsJsonAsync<FailResponse>(response);
+            var exceptionHandlerFeature =
+                context.Features.Get<IExceptionHandlerFeature>();
+
+            app.Logger.LogError(default(EventId), exceptionHandlerFeature?.Error, "Error Occurred!");
+
+        });
+    });
 
 app.Run();

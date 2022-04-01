@@ -1,17 +1,17 @@
 using System.ComponentModel.DataAnnotations;
-using SquareAPI.Business;
-using SquareAPI.Data;
+using SquareAPI.Business.Models;
+using SquareAPI.Data.Entities;
 
-namespace SquareAPI.Web
+namespace SquareAPI.Web.Models
 {
     /// <summary>
-    /// Class to deserialize user enterd points data from api request.
+    /// Class to deserialize user entered points data from api request.
     /// </summary>
     public class UserInput
     {
         public UserInput()
         {
-            Points = new List<Point>();
+            Points = new List<UserPoint>();
         }
 
         [Required]
@@ -19,11 +19,16 @@ namespace SquareAPI.Web
         public int UserId { get; set; }
 
         [Required]
-        public List<Point> Points { get; set; }
+        public List<UserPoint> Points { get; set; }
 
-        internal IEnumerable<UserPoints> GetUserPoints()
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        internal IEnumerable<UserPoint> GetUserPoints()
         {
-            return Points.Select(x => new UserPoints
+            return Points.Select(x => new UserPoint
             {
                 UserId = UserId,
                 X = x.X,

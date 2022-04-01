@@ -1,5 +1,5 @@
 # Square API
-API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also reutrn number of squares can be drawn from provided points.
+API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also return number of squares can be drawn from provided points.
 ## Operations
 - Add - Add single/bulk co-ordinate points
 - Delete - Delete single/bulk co-ordinate points
@@ -7,7 +7,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
 ---
 ## Packages used
  - Microsoft.Data.SqlClient - To connect with MS SQL Database
- - Dapper - Micro ORM to manage databasse operation
+ - Dapper - Micro ORM to manage database operation
  - Swashbuckle.AspNetCore - Swagger documentation
  - MSTest - Unit test framework
  ---
@@ -16,7 +16,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
 - GIT
 - Visual Studio Code or Visual Studio (if you want to deep dive in colorful code)
 - Microsoft SQL Server
-- Micoroft SQL Managment Studio or any Other Sql Server Client
+- Microsoft SQL Management Studio or any Other Sql Server Client
 - Docker Desktop (To run docker images)
 - Postman (kind of optional, to test WebAPI)
 ---

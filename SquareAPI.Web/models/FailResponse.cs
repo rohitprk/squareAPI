@@ -4,14 +4,14 @@ using SquareAPI.Business;
 namespace SquareAPI.Web.Models
 {
     /// <summary>
-    /// Standard response class for insert/delete API's response.
+    /// Standard fail response class for swagger example.
     /// </summary>
-    public class Response
+    public class FailResponse
     {
         /// <summary>
-        /// Success true if execution successful.
+        /// Success value always false.
         /// </summary>
-        /// <example>true</example>
+        /// <example>false</example>
         public bool Success { get; set; }
 
         /// <summary>
