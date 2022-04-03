@@ -24,14 +24,14 @@ namespace SquareAPI.Web.Controllers.v1
         /// <summary>
         /// JWT repository instance for JWT Authentication. 
         /// </summary>
-        private readonly IJWTRepository _jwtRepository;
+        private readonly IJWTService _jwtRepository;
 
         /// <summary>
         /// Constructor to initialize readonly variables.
         /// </summary>
         /// <param name="service"> User Service injected instance.</param>
         /// <param name="jwtRepository">JWT repository injected instance.</param>
-        public UserController(IUserService service, IJWTRepository jwtRepository)
+        public UserController(IUserService service, IJWTService jwtRepository)
         {
             _userService = service;
             _jwtRepository = jwtRepository;
@@ -69,7 +69,7 @@ namespace SquareAPI.Web.Controllers.v1
         /// <summary>
         /// Register new users.
         /// </summary>
-        /// <param name="usersdata">User credentials.</param>
+        /// <param name="user">User information for registration.</param>
         /// <returns></returns>
         [AllowAnonymous]
         [HttpPost]

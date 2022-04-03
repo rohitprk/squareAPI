@@ -8,9 +8,11 @@ namespace SquareAPI.Data
     /// </summary>
     public interface IUserPointsRepository
     {
-        public Task<IEnumerable<UserPoint>> GetUserPoints(int userId);
-        public Task AddUserPoints(IEnumerable<UserPoint> userPoints);
-        public Task DeleteUserPoints(IEnumerable<UserPoint> userPoints);
+        Task<IEnumerable<UserPoint>> GetUserPoints(int userId);
+        Task AddUserPoints(IEnumerable<UserPoint> userPoints);
+        Task DeleteUserPoints(IEnumerable<UserPoint> userPoints);
+        Task UpdateUserSquarePoints(int userId, string squarePointJson);
+        Task<string> GetUserSquarePointJson(int userId);
     }
 
     /// <summary>
@@ -41,7 +43,9 @@ namespace SquareAPI.Data
         {
             using (var connection = _context.CreateConnection())
             {
-                string query = "INSERT INTO UserPoints(UserId, x, y) VALUES(@UserId, @x, @y)";
+                string query = 
+                    @"INSERT INTO UserPoints(UserId, x, y) VALUES(@UserId, @x, @y);
+                    UPDATE UserSquarePoints SET LastUpdateTime = NULL WHERE UserId = @UserId";
                 await connection.ExecuteAsync(query, userPoints);
             }
         }
@@ -50,7 +54,7 @@ namespace SquareAPI.Data
         /// Get user points from DB.
         /// </summary>
         /// <param name="userId">User id to fetch points.</param>
-        /// <returns><see cref="IEnumerable<UserPoints>">List of UserPoints</see> object.</returns>
+        /// <returns>List of UserPoints object.</returns>
         public async Task<IEnumerable<UserPoint>> GetUserPoints(int userId)
         {
             var query = "SELECT UserId, X, Y FROM UserPoints WHERE UserId = @UserId";
@@ -70,10 +74,49 @@ namespace SquareAPI.Data
         {
             using (var connection = _context.CreateConnection())
             {
-                string query = "DELETE FROM UserPoints WHERE UserId = @UserId AND x = @x AND y = @y";
+                string query = 
+                @"DELETE FROM UserPoints WHERE UserId = @UserId AND x = @x AND y = @y;
+                UPDATE UserSquarePoints SET LastUpdateTime = NULL WHERE UserId = @UserId";
                 await connection.ExecuteAsync(query, userPoints);
             }
 
+        }
+
+        /// <summary>
+        /// Get UserSquarePoints data from DB.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <returns>UserSquarePoints Json formatted string.</returns>
+        public async Task<string> GetUserSquarePointJson (int userId)
+        {
+            var query = "SELECT SquarePointJson FROM UserSquarePoints WHERE UserId = @UserId AND LastUpdateTime IS NOT NULL";
+            using (var connection = _context.CreateConnection())
+            {
+                var result = await connection.QueryAsync<string>(query, new { UserId = userId });
+                return result.FirstOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Insert/update UserSquarePoints data in DB.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <param name="squarePointJson">UserSquarePoints Json formatted string to update.</param>
+        /// <returns></returns>
+        public async Task UpdateUserSquarePoints(int userId, string squarePointJson)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                string query = 
+                @"IF NOT EXISTS(SELECT 1 FROM UserSquarePoints WHERE UserId = @UserId)
+                    INSERT INTO UserSquarePoints(UserId, SquarePointJson, LastUpdateTime) VALUES(@UserId, @SquarePointJson, GETDATE())
+                ELSE
+                    UPDATE UserSquarePoints
+                        SET SquarePointJson = @SquarePointJson,
+                            LastUpdateTime = GETDATE()
+                    WHERE UserId = @UserId";
+                await connection.ExecuteAsync(query, new { UserId = userId, SquarePointJson = squarePointJson});
+            }
         }
     }
 }

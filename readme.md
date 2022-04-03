@@ -55,6 +55,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
  - Swashbuckle.AspNetCore - Swagger documentation
  - MSTest - Unit test framework
  - CSVHelper - To read CSV file for bulk Upload
+ - Microsoft.AspNetCore.Authentication.JwtBearer - JWT Bearer Authentication
  ---
 ## Prerequisites
 - .NET SDK 6.0.201
@@ -103,4 +104,3 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     dotnet test
     ```
 ---
-s

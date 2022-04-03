@@ -44,7 +44,17 @@ namespace SquareAPI.Web.Controllers.v1
         {
             var response = new SquareResponse();
 
-            var squareData = await _squareService.GetSquare(UserId);
+            var squareData = await _squareService.GetUserSquarePoints(UserId);
+
+            if (squareData is null)
+            {
+                var userPoints = await _squareService.GetUserPoints(UserId);
+                squareData = _squareService.CalculateSquare(userPoints);
+                if (squareData.Square.Any())
+                {
+                    await _squareService.UpdateUserSquarePoints(UserId, squareData);
+                }
+            }
 
             response.Success = true;
             response.Message = squareData.Count > 0 ? string.Empty : ResponseMessage.NoPointDataForSquare;

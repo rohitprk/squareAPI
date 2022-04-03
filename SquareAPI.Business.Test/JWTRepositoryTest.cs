@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SquareAPI.Business.Constants;
-using SquareAPI.Data;
 using SquareAPI.Data.Entities;
 
 namespace SquareAPI.Business.Test;
@@ -17,7 +16,7 @@ public class JWTRepositoryTest
         {ApplicationConstant.JWTKeyConfig, "anyHashKey@456789"},
     };
 
-    private IJWTRepository _jwtRepository;
+    private IJWTService _jwtRepository;
 
     [TestInitialize]
     public void TestInitialize()
@@ -30,7 +29,7 @@ public class JWTRepositoryTest
             .AddInMemoryCollection(_inMemorySettings)
             .Build();
 
-        _jwtRepository = new JWTRepository(configuration, mockUserRepo.Object);
+        _jwtRepository = new JWTService(configuration, mockUserRepo.Object);
 
     }
     

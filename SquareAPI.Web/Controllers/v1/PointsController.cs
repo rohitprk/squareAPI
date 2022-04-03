@@ -51,7 +51,11 @@ namespace SquareAPI.Web.Controllers.v1
 
             if (input.Points.Count > 0)
             {
-                await _squareService.AddUserPoints(input.GetUserPoints(UserId));
+                bool isAdded = await _squareService.AddUserPoints(input.GetUserPoints(UserId));
+                if (isAdded)
+                {
+                    await _squareService.UpdateSquarePoints(UserId);
+                }
                 response.Success = true;
                 response.Message = ResponseMessage.RecordsInsertSuccess;
             }
@@ -89,7 +93,7 @@ namespace SquareAPI.Web.Controllers.v1
             {
                 using (var stream = new StreamReader(file.OpenReadStream()))
                 {
-                    var pointsToUpload = _squareService.GetPoints(stream);
+                    var pointsToUpload = _squareService.GetPointsFromStream(stream);
                     if (pointsToUpload != null && pointsToUpload.Count() > 0)
                     {
                         foreach (var points in pointsToUpload)
@@ -97,7 +101,11 @@ namespace SquareAPI.Web.Controllers.v1
                             points.UserId = UserId;
                         }
 
-                        await _squareService.AddUserPoints(pointsToUpload);
+                        bool isAdded = await _squareService.AddUserPoints(pointsToUpload);
+                        if (isAdded)
+                        {
+                            await _squareService.UpdateSquarePoints(UserId);
+                        }
                         response.Success = true;
                         response.Message = ResponseMessage.FileUploadSuccess;
                         return Ok(response);
@@ -132,6 +140,7 @@ namespace SquareAPI.Web.Controllers.v1
             if (input.Points.Count > 0)
             {
                 await _squareService.DeleteUserPoints(input.GetUserPoints(UserId));
+                await _squareService.UpdateSquarePoints(UserId);
                 response.Success = true;
                 response.Message = ResponseMessage.RecordsDeleteSuccess;
             }

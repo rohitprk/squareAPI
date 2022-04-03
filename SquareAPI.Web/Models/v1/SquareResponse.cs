@@ -11,6 +11,6 @@ namespace SquareAPI.Web.Models.v1
         /// Field to return SquarePoint data.
         /// </summary>
         /// <value>SquarePoint</value>
-        public new SquarePoint Data { get; set; }
+        public SquarePoint Data { get; set; }
     }
 }

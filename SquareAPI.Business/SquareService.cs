@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using CsvHelper;
 using SquareAPI.Business.Models;
 using SquareAPI.Data;
@@ -7,11 +8,14 @@ using SquareAPI.Data.Entities;
 namespace SquareAPI.Business
 {
     public interface ISquareService {
-        Task AddUserPoints(IEnumerable<UserPoint> userPoints);
+        Task<bool> AddUserPoints(IEnumerable<UserPoint> userPoints);
         Task DeleteUserPoints(IEnumerable<UserPoint> userPoints);
-
-        Task<SquarePoint> GetSquare(int userId);
-        IEnumerable<UserPoint> GetPoints(StreamReader stream);
+        Task<IEnumerable<UserPoint>> GetUserPoints(int userId);
+        Task UpdateUserSquarePoints(int userId, SquarePoint squarePoint);
+        Task<SquarePoint> GetUserSquarePoints(int userId);
+        Task UpdateSquarePoints(int userId);
+        SquarePoint CalculateSquare(IEnumerable<UserPoint> userPoints);
+        IEnumerable<UserPoint> GetPointsFromStream(StreamReader stream);
     }
 
     /// <summary>
@@ -36,42 +40,97 @@ namespace SquareAPI.Business
         /// <summary>
         /// Add unique user points in DB.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="userId">Current user's Id.</param>
         /// <param name="userPoints">List of User co-ordinate points.</param>
-        /// <returns></returns>
-        public async Task AddUserPoints(IEnumerable<UserPoint> userPoints)
+        /// <returns>True if there is any new point to add.</returns>
+        public async Task<bool> AddUserPoints(IEnumerable<UserPoint> userPoints)
         {
-            var existingPoints = await _squareDataRepo.GetUserPoints(userPoints.First().UserId);
+            var userId = userPoints.First().UserId;
+            var existingPoints = await _squareDataRepo.GetUserPoints(userId);
             var newUserPoints = userPoints.Except(existingPoints.Distinct());
 
             if (newUserPoints.Any())
             {
                 await _squareDataRepo.AddUserPoints(newUserPoints);
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
         /// Delete user points from DB.
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="userId">Current user's Id.</param>
         /// <param name="userPoints">List of User co-ordinate points to delete.</param>
         /// <returns></returns>
         public async Task DeleteUserPoints(IEnumerable<UserPoint> userPoints)
         {
+            var userId = userPoints.First().UserId;
             await _squareDataRepo.DeleteUserPoints(userPoints);
         }
 
         /// <summary>
-        /// Get square formed from User Points. 
+        /// Get user points from DB.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <returns>List of UserPoint object stored in DB.</returns>
+        public async Task<IEnumerable<UserPoint>> GetUserPoints(int userId)
+        {
+            return await _squareDataRepo.GetUserPoints(userId);
+        }
+
+        /// <summary>
+        /// Get UserSquarePoints data from DB.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <returns>SquarePoint object.</returns>
+        public async Task<SquarePoint> GetUserSquarePoints(int userId)
+        {
+            string squarePointJson = await _squareDataRepo.GetUserSquarePointJson(userId);
+            if (!string.IsNullOrEmpty(squarePointJson))
+            {
+                var squarePoint = JsonSerializer.Deserialize<SquarePoint>(squarePointJson);
+                return squarePoint;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Update UserSquarePoints data in DB.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <param name="squarePoint">SquarePoint object to update data in DB.</param>
+        /// <returns></returns>
+        public async Task UpdateUserSquarePoints(int userId, SquarePoint squarePoint)
+        {
+            string squarePointJson = JsonSerializer.Serialize(squarePoint);
+            await _squareDataRepo.UpdateUserSquarePoints(userId, squarePointJson);
+        }        
+
+        /// <summary>
+        /// Recalculate and update Square point data in db after add/delete API operations.
+        /// </summary>
+        /// <param name="userId">Current user's Id.</param>
+        /// <returns></returns>
+        public async Task UpdateSquarePoints(int userId)
+        {
+            var userPoints = await _squareDataRepo.GetUserPoints(userId);
+            var squarePoint = CalculateSquare(userPoints);
+            await UpdateUserSquarePoints(userId, squarePoint);
+        }
+
+        /// <summary>
+        /// Calculate square formed from User Points. 
         /// </summary>
         /// <param name="userId">User Id to get user points.</param>
         /// <returns>Square point object with square count and square co-ordinates.</returns>
-        public async Task<SquarePoint> GetSquare(int userId)
+        public SquarePoint CalculateSquare(IEnumerable<UserPoint> userPoints)
         {
             var squarePoint = new SquarePoint();
             IDictionary<string, Square> squares = new Dictionary<string, Square>();
             int squareCount = 0;
-            var userPoints = await _squareDataRepo.GetUserPoints(userId);
             if (userPoints != null && userPoints.Count() > 3)
             {
                 // convert to dictionary with unique key
@@ -141,11 +200,11 @@ namespace SquareAPI.Business
         }
 
         /// <summary>
-        /// Read from stream using CSVHelper.
+        /// Read csv points data from stream using CSVHelper.
         /// </summary>
         /// <param name="stream">Stream reader object holding file data.</param>
         /// <returns>List of UserPoints uploaded in file.</returns>
-        public IEnumerable<UserPoint> GetPoints(StreamReader stream)
+        public IEnumerable<UserPoint> GetPointsFromStream(StreamReader stream)
         {
             using (var csv = new CsvReader(stream, CultureInfo.InvariantCulture))
             {

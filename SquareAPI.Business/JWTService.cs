@@ -4,7 +4,6 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SquareAPI.Business.Constants;
-using SquareAPI.Business.Models;
 using SquareAPI.Data.Entities;
 
 namespace SquareAPI.Business
@@ -12,7 +11,7 @@ namespace SquareAPI.Business
     /// <summary>
     /// Interface to implement JWT methods.
     /// </summary>
-    public interface IJWTRepository 
+    public interface IJWTService 
     {
         Task<string> Authenticate(Users users);
     }
@@ -20,7 +19,7 @@ namespace SquareAPI.Business
 /// <summary>
 /// Class to generate and validate JWT.
 /// </summary>
-    public class JWTRepository : IJWTRepository
+    public class JWTService : IJWTService
     {
         /// <summary>
         /// Instance of Configuration to read from configuration file.
@@ -37,7 +36,7 @@ namespace SquareAPI.Business
         /// </summary>
         /// <param name="configuration"></param>
         /// <param name="userService"></param>
-        public JWTRepository(IConfiguration configuration, IUserService userService)
+        public JWTService(IConfiguration configuration, IUserService userService)
         {
            _configuration = configuration;
             _userService = userService;

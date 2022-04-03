@@ -18,13 +18,10 @@ public class SquareServiceTest
     [TestMethod]
     public async Task GetSquareTest()
     {
-        int userId = 1;
         SquarePoint expectedResult = GetExpectedResult();
-
         var mockUserPointsRepo = new Mock<IUserPointsRepository>();
-        mockUserPointsRepo.Setup(x => x.GetUserPoints(userId)).Returns(Task.FromResult(GetTestData()));
 
-        var actualResult = await new SquareService(mockUserPointsRepo.Object).GetSquare(userId);
+        var actualResult = new SquareService(mockUserPointsRepo.Object).CalculateSquare(GetTestData());
         Assert.AreEqual(expectedResult.Count, actualResult.Count);
 
         int i = 0;
@@ -45,7 +42,7 @@ public class SquareServiceTest
             using (StreamReader sr = new StreamReader(ms))
             {
                 var mockUserPointsRepo = new Mock<IUserPointsRepository>();
-                var result = new SquareService(mockUserPointsRepo.Object).GetPoints(sr);
+                var result = new SquareService(mockUserPointsRepo.Object).GetPointsFromStream(sr);
 
                 Assert.IsTrue(result.Count() == 15);
                 int i = 0;

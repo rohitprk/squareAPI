@@ -66,7 +66,7 @@ builder.Services.AddSingleton<SquareAPIContext>();
 builder.Services.AddScoped<IUserPointsRepository, UserPointsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISquareService, SquareService>();
-builder.Services.AddScoped<IJWTRepository, JWTRepository>();
+builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Swagger

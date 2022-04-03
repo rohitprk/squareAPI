@@ -17,6 +17,14 @@ create table Users
 	[Password] VARCHAR(500) NOT NULL 
 )
 
-
+GO
 create nonclustered index IX_Users_Name_Password 
       on Users ([Name] ASC, [Password] ASC) 
+GO
+Create table UserSquarePoints
+(
+	UserId INT NOT NULL,
+	SquarePointJson TEXT NOT NULL,
+	LastUpdateTime DATETIME NULL,
+	CONSTRAINT PK_UserSquarePoints_UserId PRIMARY KEY(UserId)
+)
