@@ -63,5 +63,14 @@ namespace SquareAPI.Data.Entities
         {
             return UserId.GetHashCode() ^ X.GetHashCode() ^ Y.GetHashCode();
         }
+
+        /// <summary>
+        /// Get co-ordinates csv value.
+        /// </summary>
+        /// <returns>csv string</returns>
+        public string GetCSV()
+        {
+            return $"{X},{Y}";
+        }
     }
 }

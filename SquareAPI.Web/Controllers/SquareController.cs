@@ -1,6 +1,8 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
+using SquareAPI.Business.Constants;
 using SquareAPI.Web.Models;
 
 namespace SquareAPI.Web.Controllers
@@ -10,19 +12,20 @@ namespace SquareAPI.Web.Controllers
     /// Controller class for UserPoints API operations.
     /// </summary>
     [ApiController]
+    [Authorize]
     [Route("api/square")]
-    public class SquareController : ControllerBase
+    public class SquareController : ApiController
     {
         /// <summary>
         /// SquareService instance to access business logic.
         /// </summary>
-        private readonly SquareService _squareService;
+        private readonly ISquareService _squareService;
 
         /// <summary>
         /// Constructor to initialize readonly variables.
         /// </summary>
         /// <param name="squareService">Injected instance of SquareService.</param>
-        public SquareController(SquareService squareService)
+        public SquareController(ISquareService squareService)
         {
             _squareService = squareService;
         }
@@ -30,26 +33,25 @@ namespace SquareAPI.Web.Controllers
         /// <summary>
         /// Get squares from points stored in DB.
         /// </summary>
-        /// <param name="userId">User Id to get data.</param>
         /// <returns></returns>
         /// <response code="200">Success</response>
         /// <response code="500">internal server error</response>
         [HttpGet]
-        [Route("{userId:int}")]
-        [Produces("application/json")]
+        [Produces(ApplicationConstant.JsonContentType)]
         [ProducesResponseType(typeof(SquareResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Get(int userId)
+        [ProducesResponseType(typeof(FailResponse), (int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> Get()
         {
             var response = new SquareResponse()
             {
                 Success = false,
-                Message = "No points data found for user."
+                Message = ResponseMessage.NoPointsData
             };
 
-            var squareData = await _squareService.GetSquare(userId);
+            var squareData = await _squareService.GetSquare(UserId);
 
             response.Success = true;
-            response.Message = squareData.Count > 0 ? string.Empty : "No points to form square.";
+            response.Message = squareData.Count > 0 ? string.Empty : ResponseMessage.NoPointDataForSquare;
             response.Data = squareData;
 
             return Ok(response);

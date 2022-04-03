@@ -1,7 +1,10 @@
 # Square API
 API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also return number of squares can be drawn from provided points.
 ## Operations
+- Register - Register new user
+- Authenticate - Validate user and generate access token
 - Add - Add single/bulk co-ordinate points
+- FileUpload - Upload csv file and insert points data
 - Delete - Delete single/bulk co-ordinate points
 - Squares - Get points that form square on 2D plane and the no. of squares that can be formed from co-ordinate points. 
 ---

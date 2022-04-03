@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -16,10 +19,10 @@ public class SquareServiceTest
     public async Task GetSquareTest()
     {
         int userId = 1;
-        SquarePoint expectedResult = getExprectedResult();
+        SquarePoint expectedResult = GetExpectedResult();
 
         var mockUserPointsRepo = new Mock<IUserPointsRepository>();
-        mockUserPointsRepo.Setup(x => x.GetUserPoints(userId)).Returns(Task.FromResult(getTestData()));
+        mockUserPointsRepo.Setup(x => x.GetUserPoints(userId)).Returns(Task.FromResult(GetTestData()));
 
         var actualResult = await new SquareService(mockUserPointsRepo.Object).GetSquare(userId);
         Assert.AreEqual(expectedResult.Count, actualResult.Count);
@@ -33,41 +36,35 @@ public class SquareServiceTest
     }
 
     [TestMethod]
-    public void GetSquareTimeTest()
+    public async Task GetPointsTest()
     {
-        int userId = 1;
-        SquarePoint expectedResult = getExprectedResult();
-
-        var mockUserPointsRepo = new Mock<IUserPointsRepository>();
-        mockUserPointsRepo.Setup(x => x.GetUserPoints(userId)).Returns(Task.FromResult(get2KTestData()));
-        var startTime = DateTime.Now;
-        var actualResult = new SquareService(mockUserPointsRepo.Object).GetSquare(userId).Result;
-        var endTime = DateTime.Now;
-
-        Console.Write(actualResult.Count);
-        var latency = endTime.Subtract(startTime).Seconds;
-        Console.Write(latency);
-        Assert.IsTrue(latency < 4);
-
-    }
-
-    private IEnumerable<UserPoint> get2KTestData()
-    {
-        List<UserPoint> userPoints = new List<UserPoint>();
-        for (int i = 0; i < 2000; i++)
+        var csvData = GetTestPointsCSV();
+        var encodedData = Encoding.UTF8.GetBytes(csvData);
+        using (MemoryStream ms = new MemoryStream(encodedData))
         {
-            userPoints.Add(new UserPoint { X = i, Y = i });
+            using (StreamReader sr = new StreamReader(ms))
+            {
+                var mockUserPointsRepo = new Mock<IUserPointsRepository>();
+                var result = new SquareService(mockUserPointsRepo.Object).GetPoints(sr);
+
+                Assert.IsTrue(result.Count() == 15);
+                int i = 0;
+                foreach (var point in GetTestData())
+                {
+                    Assert.AreEqual(point, result.ElementAt(i));
+                    i++;
+                }
+            }
         }
 
-        return userPoints;
     }
 
-    private SquarePoint getExprectedResult()
+    private SquarePoint GetExpectedResult()
     {
         return new SquarePoint
         {
             Count = 4,
-            Square = 
+            Square =
             new List<Square> {
                 new Square { Points = new[]{
                     new UserPoint{X = 0, Y=0},
@@ -97,7 +94,7 @@ public class SquareServiceTest
         };
     }
 
-    private IEnumerable<UserPoint> getTestData()
+    private IEnumerable<UserPoint> GetTestData()
     {
         return new List<UserPoint> {
             new UserPoint {X = 0, Y = 0},
@@ -116,6 +113,18 @@ public class SquareServiceTest
             new UserPoint {X = 3, Y = 4},
             new UserPoint {X = 0, Y = -2}
         };
-        
+
+    }
+
+    private string GetTestPointsCSV()
+    {
+        StringBuilder builder = new StringBuilder("");
+        builder.AppendLine("X,Y");
+        foreach (var point in GetTestData())
+        {
+            builder.AppendLine(point.GetCSV());
+        }
+
+        return builder.ToString();
     }
 }

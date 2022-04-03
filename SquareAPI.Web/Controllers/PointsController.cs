@@ -1,6 +1,8 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
+using SquareAPI.Business.Constants;
 using SquareAPI.Web.Models;
 
 namespace SquareAPI.Web.Controllers
@@ -10,19 +12,20 @@ namespace SquareAPI.Web.Controllers
     /// Controller class for UserPoints API operations.
     /// </summary>
     [ApiController]
+    [Authorize]
     [Route("api/points/[action]")]
-    public class PointsController : ControllerBase
+    public class PointsController : ApiController
     {
         /// <summary>
         /// SquareService instance to access business logic.
         /// </summary>
-        private readonly SquareService _squareService;
+        private readonly ISquareService _squareService;
 
         /// <summary>
         /// Constructor to initialize readonly variables.
         /// </summary>
         /// <param name="squareService">Injected instance of SquareService.</param>
-        public PointsController(SquareService squareService)
+        public PointsController(ISquareService squareService)
         {
             _squareService = squareService;
         }
@@ -36,8 +39,9 @@ namespace SquareAPI.Web.Controllers
         /// <response code="400">Bad Request. Points are missing</response>
         /// <response code="500">Internal server error</response>
         [HttpPost]
-        [Produces("application/json")]
+        [Produces(ApplicationConstant.JsonContentType)]
         [ProducesResponseType(typeof(Response), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(FailResponse), (int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> Add([FromBody] UserInput input)
         {
             var response = new Response()
@@ -47,14 +51,14 @@ namespace SquareAPI.Web.Controllers
 
             if (input.Points.Count > 0)
             {
-                await _squareService.AddUserPoints(input.GetUserPoints());
+                await _squareService.AddUserPoints(input.GetUserPoints(UserId));
                 response.Success = true;
-                response.Message = "Record/s inserted Successfully!";
+                response.Message = ResponseMessage.RecordsInsertSuccess;
             }
             else
             {
                 response.Success = false;
-                response.Message = "No point data to add.";
+                response.Message = ResponseMessage.RecordsInsertFail;
                 return BadRequest(response);
             }
 
@@ -63,40 +67,45 @@ namespace SquareAPI.Web.Controllers
         }
 
         /// <summary>
-        /// Upload CSV file to insert data in DB.
+        /// Upload CSV file to insert points in DB.
         /// </summary>
-        /// <param name="userId">Current User Id to store respective data.</param>
         /// <param name="file">Uploaded csv file.</param>
         /// <returns></returns>
         /// <response code="200">Success</response>
         /// <response code="400">Bad Request. Points are missing</response>
         /// <response code="500">Internal server error</response>
         [HttpPost]
-        [Produces("application/json")]
+        [Produces(ApplicationConstant.JsonContentType)]
         [ProducesResponseType(typeof(Response), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> FileUpload([FromForm] int userId, IFormFile file)
+        [ProducesResponseType(typeof(FailResponse), (int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> FileUpload(IFormFile file)
         {
             var response = new Response()
             {
                 Success = false
             };
 
-            if (file != null && file.Length > 0 && Path.GetExtension(file.FileName).ToLower() == ".csv")
+            if (file != null && file.Length > 0 && Path.GetExtension(file.FileName).ToLower() == ApplicationConstant.CsvFileExtention)
             {
                 using (var stream = new StreamReader(file.OpenReadStream()))
                 {
-                    var pointsToUpload = _squareService.GetPoints(stream).Where(x => x.UserId == userId);
+                    var pointsToUpload = _squareService.GetPoints(stream);
                     if (pointsToUpload != null && pointsToUpload.Count() > 0)
                     {
+                        foreach (var points in pointsToUpload)
+                        {
+                            points.UserId = UserId;
+                        }
+
                         await _squareService.AddUserPoints(pointsToUpload);
                         response.Success = true;
-                        response.Message = "Uploaded file successfully!";
+                        response.Message = ResponseMessage.FileUploadSuccess;
                         return Ok(response);
                     }
                 }
             }
 
-            response.Message = "No data or invalid file type! Only CSV format file supported.";
+            response.Message = ResponseMessage.FileInvalid;
             return BadRequest(response);
 
         }
@@ -110,8 +119,9 @@ namespace SquareAPI.Web.Controllers
         /// <response code="400">Bad Request. Points are missing</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete]
-        [Produces("application/json")]
+        [Produces(ApplicationConstant.JsonContentType)]
         [ProducesResponseType(typeof(Response), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(FailResponse), (int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> Delete([FromBody] UserInput input)
         {
             var response = new Response()
@@ -121,14 +131,14 @@ namespace SquareAPI.Web.Controllers
 
             if (input.Points.Count > 0)
             {
-                await _squareService.DeleteUserPoints(input.GetUserPoints());
+                await _squareService.DeleteUserPoints(input.GetUserPoints(UserId));
                 response.Success = true;
-                response.Message = "Record/s deleted Successfully!";
+                response.Message = ResponseMessage.RecordsDeleteSuccess;
             }
             else
             {
                 response.Success = false;
-                response.Message = "No points data to delete.";
+                response.Message = ResponseMessage.RecordsDeleteFail;
                 return BadRequest(response);
             }
 

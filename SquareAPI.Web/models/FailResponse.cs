@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using System.Text.Json;
 using SquareAPI.Business;
 
 namespace SquareAPI.Web.Models
@@ -19,5 +20,14 @@ namespace SquareAPI.Web.Models
         /// </summary>
         /// <example>Something relevant!</example>
         public string Message { get; set; }
+
+        /// <summary>
+        /// Overridden ToString method to return custom string. 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this);
+        }
     }
 }

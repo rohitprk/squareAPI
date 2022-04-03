@@ -6,10 +6,18 @@ using SquareAPI.Data.Entities;
 
 namespace SquareAPI.Business
 {
+    public interface ISquareService {
+        Task AddUserPoints(IEnumerable<UserPoint> userPoints);
+        Task DeleteUserPoints(IEnumerable<UserPoint> userPoints);
+
+        Task<SquarePoint> GetSquare(int userId);
+        IEnumerable<UserPoint> GetPoints(StreamReader stream);
+    }
+
     /// <summary>
     /// Service to handle DB operations and calculations.
     /// </summary>
-    public class SquareService
+    public class SquareService : ISquareService
     {
         /// <summary>
         /// UserPoints DB repository.
@@ -28,6 +36,7 @@ namespace SquareAPI.Business
         /// <summary>
         /// Add unique user points in DB.
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="userPoints">List of User co-ordinate points.</param>
         /// <returns></returns>
         public async Task AddUserPoints(IEnumerable<UserPoint> userPoints)
@@ -44,6 +53,7 @@ namespace SquareAPI.Business
         /// <summary>
         /// Delete user points from DB.
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="userPoints">List of User co-ordinate points to delete.</param>
         /// <returns></returns>
         public async Task DeleteUserPoints(IEnumerable<UserPoint> userPoints)
@@ -62,71 +72,69 @@ namespace SquareAPI.Business
             IDictionary<string, Square> squares = new Dictionary<string, Square>();
             int squareCount = 0;
             var userPoints = await _squareDataRepo.GetUserPoints(userId);
-            if (userPoints != null && userPoints.Any())
+            if (userPoints != null && userPoints.Count() > 3)
             {
-                if (userPoints.Count() > 3)
+                // convert to dictionary with unique key
+                IDictionary<string, UserPoint> dictUserPoint = userPoints.ToDictionary(x => x.Key);
+                for (int i = 0; i < dictUserPoint.Count() - 1; i++)
                 {
-                    // convert to dictionary with unique key
-                    IDictionary<string, UserPoint> dictUserPoint = userPoints.ToDictionary(x => x.Key);
-                    for (int i = 0; i < dictUserPoint.Count() - 1; i++)
+                    for (int j = i + 1; j < dictUserPoint.Count(); j++)
                     {
-                        for (int j = i + 1; j < dictUserPoint.Count(); j++)
-                        {
-                            int[] key;
+                        // to store all points whether x or y
+                        int[] allPoints;
 
-                            // calculate the vector perpendicular to the line between current two points
-                            var a2 = dictUserPoint.ElementAt(j).Value;
-                            var a1 = dictUserPoint.ElementAt(i).Value;
-                            var vectorPoint = new UserPoint
+                        // calculate the vector perpendicular to the line between current two points
+                        var a2 = dictUserPoint.ElementAt(j).Value;
+                        var a1 = dictUserPoint.ElementAt(i).Value;
+                        var vectorPoint = new UserPoint
+                        {
+                            X = a2.Y - a1.Y,
+                            Y = -(a2.X - a1.X)
+                        };
+
+                        // predicated square position can be at below points
+                        string predictedKeyA1 = (a1.X + vectorPoint.X) + "," + (a1.Y + vectorPoint.Y);
+                        string predictedKeyA2 = (a2.X + vectorPoint.X) + "," + (a2.Y + vectorPoint.Y);
+                        string predictedKeyB1 = (a1.X - vectorPoint.X) + "," + (a1.Y - vectorPoint.Y);
+                        string predictedKeyB2 = (a2.X - vectorPoint.X) + "," + (a2.Y - vectorPoint.Y);
+
+                        UserPoint p1 = null, p2 = null;
+
+                        if (dictUserPoint.ContainsKey(predictedKeyA1) && dictUserPoint.ContainsKey(predictedKeyA2))
+                        {
+                            p1 = dictUserPoint[predictedKeyA1];
+                            p2 = dictUserPoint[predictedKeyA2];
+                        }
+                        else if (dictUserPoint.ContainsKey(predictedKeyB1) && dictUserPoint.ContainsKey(predictedKeyB2))
+                        {
+                            p1 = dictUserPoint[predictedKeyB1];
+                            p2 = dictUserPoint[predictedKeyB2];
+                        }
+
+                        // if there is key with predicated square co-ordinates on x-y plane then add in list with current co-ordinates
+                        if (p1 != null && p2 != null)
+                        {
+                            // combine all x's and y's to get unique key for each square
+                            allPoints = new int[8] { a1.X, a1.Y, a2.X, a2.Y, p1.X, p1.Y, p2.X, p2.Y };
+                            var square = new Square
                             {
-                                X = a2.Y - a1.Y,
-                                Y = -(a2.X - a1.X)
+                                Points = new[] { a1, a2, p1, p2 }
                             };
 
-                            // predicated square position can be at below points
-                            string predictedKeyA1 = (a1.X + vectorPoint.X) + "," + (a1.Y + vectorPoint.Y);
-                            string predictedKeyA2 = (a2.X + vectorPoint.X) + "," + (a2.Y + vectorPoint.Y);
-                            string predictedKeyB1 = (a1.X - vectorPoint.X) + "," + (a1.Y - vectorPoint.Y);
-                            string predictedKeyB2 = (a2.X - vectorPoint.X) + "," + (a2.Y - vectorPoint.Y);
+                            var squareKey = string.Join(",", allPoints.OrderBy(x => x));
 
-                            UserPoint p1 = null, p2 = null;
-
-                            if (dictUserPoint.ContainsKey(predictedKeyA1) && dictUserPoint.ContainsKey(predictedKeyA2))
+                            // if key is not there then add new square.
+                            if (!squares.ContainsKey(squareKey))
                             {
-                                p1 = dictUserPoint[predictedKeyA1];
-                                p2 = dictUserPoint[predictedKeyA2];
-                            }
-                            else if (dictUserPoint.ContainsKey(predictedKeyB1) && dictUserPoint.ContainsKey(predictedKeyB2))
-                            {
-                                p1 = dictUserPoint[predictedKeyB1];
-                                p2 = dictUserPoint[predictedKeyB2];
-                            }
-
-                            // if there is key with predicated square co-ordinates on x-y plane then add in list with current co-ordinates
-                            if (p1 != null && p2 != null)
-                            {
-                                // combine all x's and y's to get unique key for each square
-                                key = new int[8] { a1.X, a1.Y, a2.X, a2.Y, p1.X, p1.Y, p2.X, p2.Y };
-                                var square = new Square
-                                {
-                                    Points = new[] { a1, a2, p1, p2 }
-                                };
-
-                                var squareKey = string.Join(",", key.OrderBy(x => x));
-
-                                // if key is not there then add new square.
-                                if (!squares.ContainsKey(squareKey))
-                                {
-                                    squareCount++;
-                                    squares.Add(squareKey, square);
-                                }
+                                squareCount++;
+                                squares.Add(squareKey, square);
                             }
                         }
                     }
-
-                    squarePoint.Count = squareCount;
-                    squarePoint.Square.AddRange(squares.Values);
                 }
+
+                squarePoint.Count = squareCount;
+                squarePoint.Square.AddRange(squares.Values);
             }
 
             return squarePoint;
@@ -141,6 +149,7 @@ namespace SquareAPI.Business
         {
             using (var csv = new CsvReader(stream, CultureInfo.InvariantCulture))
             {
+                csv.Context.RegisterClassMap<UserPointMap>();
                 var records = csv.GetRecords<UserPoint>().ToList();
                 return records;
             }

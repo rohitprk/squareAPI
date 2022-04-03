@@ -18,14 +18,6 @@ namespace SquareAPI.Web.Models
         }
 
         /// <summary>
-        /// Current User Id.
-        /// </summary>
-        /// <value>int</value>
-        [Required]
-        [Range(1, int.MaxValue)]
-        public int UserId { get; set; }
-
-        /// <summary>
         /// Co-ordinate points data.
         /// </summary>
         /// <value>List of UserPoints</value>
@@ -37,11 +29,11 @@ namespace SquareAPI.Web.Models
         /// Map single UserId to multiple UserPoint.UserId. 
         /// </summary>
         /// <returns>List of UserPoint.</returns>
-        internal IEnumerable<UserPoint> GetUserPoints()
+        internal IEnumerable<UserPoint> GetUserPoints(int userId)
         {
             return Points.Select(x => new UserPoint
             {
-                UserId = UserId,
+                UserId = userId,
                 X = x.X,
                 Y = x.Y
             });

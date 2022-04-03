@@ -1,14 +1,54 @@
 using System.Reflection;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SquareAPI.Business;
+using SquareAPI.Business.Constants;
 using SquareAPI.Data;
+using SquareAPI.Web;
 using SquareAPI.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+
+builder.Services.AddAuthentication(auth =>
+{
+    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(jwt =>
+{
+    var Key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]);
+    jwt.SaveToken = true;
+    jwt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateLifetime = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Key),
+        ClockSkew = TimeSpan.Zero
+    };
+
+    // override 401 response
+    jwt.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = ApplicationConstant.JsonContentType;
+            await context.Response.WriteAsync(new FailResponse
+            {
+                Message = $"{ResponseMessage.UnauthorizedAccess} {context.ErrorDescription}",
+                Success = false
+            }.ToString());
+        }
+    };
+});
 
 // Add services to the container.
 builder.Services.AddControllers(
@@ -22,8 +62,12 @@ builder.Services.AddControllers(
 
 // Dapper context and repository injection
 builder.Services.AddSingleton<SquareAPIContext>();
+
 builder.Services.AddScoped<IUserPointsRepository, UserPointsRepository>();
-builder.Services.AddScoped<SquareService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISquareService, SquareService>();
+builder.Services.AddScoped<IJWTRepository, JWTRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -44,6 +88,16 @@ builder.Services.AddSwaggerGen(c =>
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Type = SecuritySchemeType.Http,
+        Description = "JWT Authorization header."
+    });
+    c.OperationFilter<SwaggerAuthFilter>();
 });
 
 // to make all routing paths to lower case
@@ -63,6 +117,7 @@ app.UseExceptionHandler("/exception");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -73,10 +128,10 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         exceptionHandlerApp.Run(async context =>
         {
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = ApplicationConstant.JsonContentType;
             var response = new FailResponse
             {
-                Message = "Exception occurred!",
+                Message = ResponseMessage.ExceptionOccurred,
                 Success = false
             };
 
@@ -84,7 +139,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
             var exceptionHandlerFeature =
                 context.Features.Get<IExceptionHandlerFeature>();
 
-            app.Logger.LogError(default(EventId), exceptionHandlerFeature?.Error, "Error Occurred!");
+            app.Logger.LogError(default(EventId), exceptionHandlerFeature?.Error, ResponseMessage.ExceptionOccurred);
 
         });
     });
