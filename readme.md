@@ -6,7 +6,7 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
 - Add - Add single/bulk co-ordinate points
 - FileUpload - Upload csv file and insert points data
 - Delete - Delete single/bulk co-ordinate points
-- Squares - Get points that form square on 2D plane and the no. of squares that can be formed from co-ordinate points. 
+- Squares - Get points that form square on 2D plane and the no. of squares that can be formed from co-ordinate points.
 ---
 ## Packages used
  - Microsoft.Data.SqlClient - To connect with MS SQL Database
@@ -38,7 +38,8 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     dotnet build
     ```
 ## Run Web API project
- - Run Sql script DBStructure.sql in MS SQL Server
+ - Run Sql script DBStructure.sql, provided in solution folder, in MS SQL Server 
+ - Update connection string in SquareAPI.Web/appsettings.json to point your database server.
 - ### Using development server
     To run project using development Server(Kestrel), navigate to SquareAPI.Web folder and open command prompt to this location.
     Run command
@@ -54,9 +55,11 @@ API to store co-ordinate points, X and Y, find sets of points that make squares 
     ```
     docker run -p 5000:5000 squareapi:latest
     ```
+ - After running the project, Open http://localhost:{port} to view swagger documentation
 ## Run Unit Test
-    To run unit tests, navigate to SquareAPI.Business.Test folder and open command prompt and run below command
+  - To run unit tests, navigate to SquareAPI.Business.Test folder and open command prompt and run below command
     ```
     dotnet test
     ```
 ---
+s
