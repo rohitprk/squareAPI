@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business.Constants;
 
-namespace SquareAPI.Web.Controllers
+namespace SquareAPI.Web.Controllers.v1
 {
     /// <summary>
     /// Base class for all API controllers.

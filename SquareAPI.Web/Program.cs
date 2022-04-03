@@ -8,7 +8,7 @@ using SquareAPI.Business;
 using SquareAPI.Business.Constants;
 using SquareAPI.Data;
 using SquareAPI.Web;
-using SquareAPI.Web.Models;
+using SquareAPI.Web.Models.v1;
 
 var builder = WebApplication.CreateBuilder(args);
 

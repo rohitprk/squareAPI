@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using SquareAPI.Business.Models;
 using SquareAPI.Data.Entities;
 
-namespace SquareAPI.Web.Models
+namespace SquareAPI.Web.Models.v1
 {
     /// <summary>
     /// Class to deserialize user entered points data from api request.

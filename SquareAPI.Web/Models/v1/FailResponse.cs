@@ -1,8 +1,6 @@
-using System.Runtime.Serialization;
 using System.Text.Json;
-using SquareAPI.Business;
 
-namespace SquareAPI.Web.Models
+namespace SquareAPI.Web.Models.v1
 {
     /// <summary>
     /// Standard fail response class for swagger example.

@@ -3,18 +3,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
 using SquareAPI.Business.Constants;
-using SquareAPI.Business.Models;
 using SquareAPI.Data.Entities;
-using SquareAPI.Web.Models;
+using SquareAPI.Web.Models.v1;
 
-namespace SquareAPI.Web.Controllers
+namespace SquareAPI.Web.Controllers.v1
 {
 
     /// <summary>
     /// Controller class for User management.
     /// </summary>
     [ApiController]
-    [Route("api/user/[action]")]
+    [Route("api/v1/user/[action]")]
     public class UserController : ApiController
     {
         /// <summary>

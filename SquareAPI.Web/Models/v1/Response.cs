@@ -1,7 +1,4 @@
-using System.Runtime.Serialization;
-using SquareAPI.Business;
-
-namespace SquareAPI.Web.Models
+namespace SquareAPI.Web.Models.v1
 {
     /// <summary>
     /// Standard response class for insert/delete API's response.

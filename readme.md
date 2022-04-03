@@ -1,12 +1,53 @@
 # Square API
-API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also return number of squares can be drawn from provided points.
+API to store co-ordinate points, X and Y, find sets of points that make squares in 2D plane and also return number of squares can be drawn from provided points. JWT Bearer authentication is being used to validate API requests.
 ## Operations
 - Register - Register new user
+   ```
+    POST api/v1/user/register
+    {
+        "Name": "Test1",
+        "Password":"zIEzHB4Fq+3g0pHWVEns2A=="  // AES ECB Encrypted Password
+    }
+    ```
 - Authenticate - Validate user and generate access token
+    ```
+    POST api/v1/user/authenticate
+    {
+        "Name": "Test1",
+        "Password":"zIEzHB4Fq+3g0pHWVEns2A=="  // AES ECB Encrypted Password
+    }
+    ```
 - Add - Add single/bulk co-ordinate points
+    ```
+    POST api/v1/points/add
+    {
+    "points": [
+        {
+            "x":-1,
+            "y":-1
+        }]
+    }
+    ```
 - FileUpload - Upload csv file and insert points data
+    ```
+    POST api/v1/points/fileUpload
+    Content-type:multipart/form-data
+    ```
 - Delete - Delete single/bulk co-ordinate points
+    ```
+    DELETE api/v1/points/delete
+    {
+    "points": [
+        {
+            "x":-1,
+            "y":-1
+        }]
+    }
+    ```
 - Squares - Get points that form square on 2D plane and the no. of squares that can be formed from co-ordinate points.
+    ```
+    GET api/v1/square
+    ```
 ---
 ## Packages used
  - Microsoft.Data.SqlClient - To connect with MS SQL Database

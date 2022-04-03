@@ -1,4 +1,4 @@
-namespace SquareAPI.Web.Models
+namespace SquareAPI.Web.Models.v1
 {
     /// <summary>
     /// Authentication response class to generate token.

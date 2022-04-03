@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
 using SquareAPI.Business.Constants;
-using SquareAPI.Web.Models;
+using SquareAPI.Web.Models.v1;
 
-namespace SquareAPI.Web.Controllers
+namespace SquareAPI.Web.Controllers.v1
 {
 
     /// <summary>
@@ -13,7 +13,7 @@ namespace SquareAPI.Web.Controllers
     /// </summary>
     [ApiController]
     [Authorize]
-    [Route("api/square")]
+    [Route("api/v1/square")]
     public class SquareController : ApiController
     {
         /// <summary>
@@ -42,11 +42,7 @@ namespace SquareAPI.Web.Controllers
         [ProducesResponseType(typeof(FailResponse), (int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> Get()
         {
-            var response = new SquareResponse()
-            {
-                Success = false,
-                Message = ResponseMessage.NoPointsData
-            };
+            var response = new SquareResponse();
 
             var squareData = await _squareService.GetSquare(UserId);
 

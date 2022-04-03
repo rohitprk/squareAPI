@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SquareAPI.Business;
 using SquareAPI.Business.Constants;
-using SquareAPI.Web.Models;
+using SquareAPI.Web.Models.v1;
 
-namespace SquareAPI.Web.Controllers
+namespace SquareAPI.Web.Controllers.v1
 {
 
     /// <summary>
@@ -13,7 +13,7 @@ namespace SquareAPI.Web.Controllers
     /// </summary>
     [ApiController]
     [Authorize]
-    [Route("api/points/[action]")]
+    [Route("api/v1/points/[action]")]
     public class PointsController : ApiController
     {
         /// <summary>
